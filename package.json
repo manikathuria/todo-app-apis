@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "test": "jest"
+    "test": "jest --watchAll"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "mongoose": "^6.4.4"
   },
   "devDependencies": {
-    "jest": "^28.1.2"
+    "jest": "^28.1.2",
+    "supertest": "^6.2.4"
   }
 }
