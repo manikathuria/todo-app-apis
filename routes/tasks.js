@@ -1,44 +1,113 @@
 const Task = require("../models/task");
 const express = require("express");
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 
-router.post("/", async (req, res) => {
-    try {
-        const task = await new Task(req.body).save();
-        res.send(task);
-    } catch (error) {
-        res.send(error);
+const ensureToken = (req,res,next)=>{
+
+    const bearesHeader = req.headers["authorization"];
+    if(typeof bearesHeader !== 'undefined'){
+        const bearer = bearesHeader.split(" ");
+        const bearerToken  = bearer[1];
+        req.token = bearerToken;
+        next();
+    }else{
+        res.sendStatus(403);
     }
+}
+
+router.post("/",ensureToken, async (req, res) => {
+    jwt.verify(req.token, process.env.ACCESS_TOKEN_SECRET,async (err,data)=>{
+
+        if(err){
+            res.sendStatus(403);
+        }else{
+            try {
+                const task = await new Task(req.body).save();
+                res.json({
+                    text:"Task Added Successfully!!",
+                    task,
+                });
+                
+            } catch (error) {
+                res.json({
+                    text:"Some error occurred!!",
+                    task,
+                });
+                console.log(error)
+            }
+        }
+    })
 });
 
-router.get("/", async (req, res) => {
-    try {
-        const tasks = await Task.find();
-        res.send(tasks);
-    } catch (error) {
-        res.send(error);
-    }
+router.get("/",ensureToken, async (req, res) => {
+    jwt.verify(req.token, process.env.ACCESS_TOKEN_SECRET,async (err,data)=>{
+        if(err){
+            res.sendStatus(403);
+        }else{
+            try {
+                const tasks = await Task.find();              
+                res.send(tasks);
+            } catch (error) {
+                res.json({
+                    text:"Some error occurred!!",
+                });
+                console.log(error)
+            }
+        }
+    })
 });
 
-router.put("/:id", async (req, res) => {
-    try {
-        const task = await Task.findOneAndUpdate(
-            { _id: req.params.id },
-            req.body
-        );
-        res.send(task);
-    } catch (error) {
-        res.send(error);
-    }
+router.put("/:id",ensureToken, async (req, res) => {
+    jwt.verify(req.token, process.env.ACCESS_TOKEN_SECRET,async (err,data)=>{
+        if(err){
+            res.sendStatus(403);
+        }else{
+            try {
+                const task = await Task.findOneAndUpdate(
+                    { _id: req.params.id },
+                    req.body
+                );
+                res.json({
+                    text:"Task Updated Successfully!!",
+                    task,
+                });
+                
+            } catch (error) {
+                res.json({
+                    text:"Some error occurred!!",
+                    task,
+                });
+                console.log(error)
+            }
+        }
+    })
+    
 });
 
-router.delete("/:id", async (req, res) => {
-    try {
-        const task = await Task.findByIdAndDelete(req.params.id);
-        res.send(task);
-    } catch (error) {
-        res.send(error);
-    }
+router.delete("/:id",ensureToken, async (req, res) => {
+    jwt.verify(req.token, process.env.ACCESS_TOKEN_SECRET,async (err,data)=>{
+        if(err){
+            res.sendStatus(403);
+        }else{
+            try {
+                const task = await Task.findByIdAndDelete(req.params.id);
+                res.json({
+                    text:"Task Deleted Successfully!!",
+                    task,
+                });
+                
+            } catch (error) {
+                res.json({
+                    text:"Some error occurred!!",
+                    task,
+                });
+                console.log(error)
+            }
+        }
+    })
 });
+
+
 
 module.exports = router;
